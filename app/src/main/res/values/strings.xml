@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">imdb</string>
+
+    <string name="onboarding_slide1_title"></string>
+    <string name="onboarding_slide1_subtitle"></string>
+    <string name="onboarding_slide1_desc"></string>
+
+    <string name="onboarding_slide2_title">Information and Trailers</string>
+    <string name="onboarding_slide2_subtitle">Get information about any movie and see trailer</string>
+    <string name="onboarding_slide2_desc">Learn about each movie and watch the previews of the movies you like.</string>
+
+    <string name="onboarding_slide3_title">Save your favorite movies</string>
+    <string name="onboarding_slide3_subtitle">Save movies</string>
+    <string name="onboarding_slide3_desc">Save the movies you like to watch with your friends in the future.</string>
+
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="get_started">Get started</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <array name="menuOptions">
+        <item>In Theaters,ic_audience</item>
+        <item>Top 250,ic_top</item>
+        <item>Most Popular,ic_popular</item>
+        <!--        <item>Box Office,ic_box_office</item>-->
+    </array>
+
+    <array name="apiKeys">
+        <!--        <item>k_bdh2fhly</item>-->
+        <item>k_eg7d8mff</item>
+
+    </array>
+
+
+    <string name="in_theaters">Now Showing</string>
+    <string name="box_office">Box Office</string>
+    <string name="coming_soon">Coming Soon</string>
+
+    <string name="top_250_movies">Top 250 Movies</string>
+    <string name="top_250_tvs">Top 250 TVs</string>
+
+    <string name="most_popular_movies">Popular Movies</string>
+    <string name="most_popular_tvs">Popular TVs</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

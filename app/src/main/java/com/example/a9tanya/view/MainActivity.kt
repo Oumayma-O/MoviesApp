@@ -30,10 +30,10 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
     private lateinit var movieViewModel: MovieViewModel
     private lateinit var sliderAdapter: SliderAdapter
     private lateinit var viewPager: ViewPager2
-    private val slideHandler = Handler()
     private lateinit var recyclerViewPopularMovies: RecyclerView
     private lateinit var recyclerViewUpcomingMovies: RecyclerView
     private lateinit var searchView1: SearchView
+    private val slideHandler = Handler()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,16 +67,17 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
                 }
                 viewPager.setPageTransformer(compositePageTransformer)
 
-                viewPager.setCurrentItem(1, false) // false means no smooth scroll
+                viewPager.setCurrentItem(1, false)
 
                 viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
-                        slideHandler.removeCallbacks(sliderRunnable)
+                        slideHandler.removeCallbacksAndMessages(null)
+                        slideHandler.postDelayed(sliderRunnable, SliderAdapter.AUTO_SLIDE_INTERVAL)
                     }
                 })
 
-                slideHandler.postDelayed(sliderRunnable, 1000)
+                sliderAdapter.startAutoSlide()
             }
         })
 
@@ -95,7 +96,6 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
         movieViewModel.fetchNowPlayingMovies()
         movieViewModel.fetchPopularMovies()
         movieViewModel.fetchUpcomingMovies()
-
 
         searchView1 = findViewById(R.id.searchView1)
 
@@ -126,20 +126,13 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
                 return true
             }
         })
-
-
-
-
     }
-
-
 
     private val sliderRunnable = Runnable {
         viewPager.setCurrentItem(viewPager.currentItem + 1, true)
     }
 
     override fun onMovieClick(movie: MovieDto, movieImageView: ImageView) {
-
         val intent = Intent(this, DetailsActivity::class.java)
         intent.putExtra("title", movie.title)
         intent.putExtra("imgURL", movie.getFullPosterPath())
@@ -148,7 +141,11 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
 
         val options = ActivityOptions.makeSceneTransitionAnimation(this, movieImageView, "sharedName")
         startActivity(intent, options.toBundle())
+    }
 
-        //Toast.makeText(this, "Item clicked: ${movie.title}", Toast.LENGTH_LONG).show()
+    override fun onDestroy() {
+        super.onDestroy()
+        // Stop auto-slide when the activity is destroyed to avoid potential memory leaks
+        sliderAdapter.stopAutoSlide()
     }
 }

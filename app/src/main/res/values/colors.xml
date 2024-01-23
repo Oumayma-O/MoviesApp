@@ -10,7 +10,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorAccent">@color/main</color>
 
-    <color name="colorPrimary">#201f28</color>
+    <color name="colorPrimary">#FFFFFF</color>
 
     <color name="mainTransparent">#50ffaf2e</color>
     <color name="main">#ffaf2e</color>

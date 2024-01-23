@@ -37,8 +37,6 @@ class OnBoardingActivity : AppCompatActivity() {
             finish()
         }
 
-        // hide the action bar
-        supportActionBar?.hide()
 
         // init views
         btnNext = findViewById(R.id.btn_next)

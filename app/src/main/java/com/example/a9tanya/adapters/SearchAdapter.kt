@@ -52,7 +52,10 @@ class SearchAdapter(private val context: Context, private val items: List<MovieD
 
         holder.titleTxt.text = movie.title
         holder.releaseDateTxt.text = movie.release_date
-        holder.ratingTxt.text=movie.vote_average.toString()
+
+        val voteAverage = movie.vote_average
+        val formattedVoteAverage = String.format("%.1f", voteAverage)
+        holder.ratingTxt.text=formattedVoteAverage
 
     }
 

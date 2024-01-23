@@ -23,7 +23,7 @@
         <activity
             android:name=".view.MainActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            />
         <activity
             android:name=".view.OnBoardingActivity"
             android:exported="false"

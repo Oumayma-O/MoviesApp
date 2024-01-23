@@ -6,8 +6,17 @@
 
         <item name="android:windowContentTransitions">true</item>
 
-        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+        <item name="android:editTextColor">@color/lightGrey</item>
+        <item name="android:textColorHint">#91969B</item>
     </style>
+
+
 
     <style name="Widget.MaterialComponents.Button.TextButton.OnBoardTextButton"
         parent="Widget.MaterialComponents.Button.TextButton">
@@ -22,7 +31,8 @@
     </style>
 
     <style name="AppTheme.FullScreen" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="RoundedEdges" parent="">

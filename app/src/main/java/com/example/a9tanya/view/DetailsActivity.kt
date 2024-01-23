@@ -2,9 +2,13 @@ package com.example.a9tanya.view
 
 import android.app.ActivityOptions
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -39,8 +43,12 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
+
+        actionBar?.hide();
+
 
         recyclerViewSimilairMovies = findViewById(R.id.SimilairMoviesRecyclerview)
 
@@ -170,11 +178,25 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
                 releaseDateTextView.text = it.release_date
 
                 val ratingTextView = findViewById<TextView>(R.id.rating)
-                ratingTextView.text = it.vote_average.toString()
+                val voteAverage = it.vote_average
+                val formattedVoteAverage = String.format("%.1f", voteAverage)
+
+                ratingTextView.text = formattedVoteAverage
+
+                val runtime = it.runtime
+
+                val hours = runtime / 60
+                val minutes = runtime % 60
+
+                val formattedRuntime = if (hours > 0) {
+                    "$hours h $minutes min"
+                } else {
+                    "$minutes min"
+                }
 
                 val runtimeTextView = findViewById<TextView>(R.id.runtime)
-                val runtime = "${it.runtime} min"
-                runtimeTextView.text = runtime
+                runtimeTextView.text = formattedRuntime
+
 
                 val descriptionTextView = findViewById<TextView>(R.id.MovieDetailDescription)
                 descriptionTextView.text = it.overview

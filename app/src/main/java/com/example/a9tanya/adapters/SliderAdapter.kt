@@ -54,8 +54,8 @@ class SliderAdapter(private val images: List<MovieDto>, private val viewPager2: 
         return images.size
     }
 
-    fun startAutoSlide(delayMillis: Long) {
-        handler.postDelayed(autoSlideRunnable, delayMillis)
+    fun startAutoSlide() {
+        handler.postDelayed(autoSlideRunnable, AUTO_SLIDE_INTERVAL)
     }
 
     fun stopAutoSlide() {
@@ -66,8 +66,12 @@ class SliderAdapter(private val images: List<MovieDto>, private val viewPager2: 
         viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                startAutoSlide(3000)
+                startAutoSlide()
             }
         })
+    }
+
+    companion object {
+        const val AUTO_SLIDE_INTERVAL = 3000L
     }
 }

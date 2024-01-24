@@ -63,8 +63,8 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        registerReceiver(connectivityReceiver, filter)
+        registerReceiver(connectivityReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+
 
 
 
@@ -86,12 +86,10 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
                     Log.e("MainActivity","No internet connection")
 
                 } else {
-                    // Show the original error message
                     Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
                     Log.e("MainActivity","errorMessage")
 
                 }
-                // You can also use a dialog or other visual approach
             }
         }
 

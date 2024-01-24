@@ -15,6 +15,7 @@ import com.example.a9tanya.movieList.data.remote.respond.cast.CastResponse
 import com.example.a9tanya.movieList.data.remote.respond.movie_detail.MovieDetailResponse
 import com.example.a9tanya.movieList.data.remote.respond.videos.VideoDto
 import com.example.a9tanya.movieList.data.remote.respond.videos.VideosResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,65 +53,58 @@ class MovieViewModel : ViewModel() {
 
 
     fun fetchNowPlayingMovies() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = movieApi.getMoviesList("now_playing", 1)
                 if (response.isSuccessful) {
                     val movies = response.body()?.results ?: emptyList()
-                    _nowPlayingMovies.value = movies
+                    _nowPlayingMovies.postValue(movies)
                     Log.d(TAG, "Now Playing Movies fetched successfully: $movies")
                 } else {
                     // Handle error
-                    _networkError.value = "Error fetching Now Playing Movies"
-                    _nowPlayingMovies.value = emptyList()
+                    _nowPlayingMovies.postValue(emptyList())
                     Log.e(TAG, "Error fetching Now Playing Movies: ${response.code()} - ${response.message()}")
                     Log.e(TAG, "Error response body: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Now Playing Movies fetch: ${e.message}")
             }
         }
     }
 
     fun fetchPopularMovies() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = movieApi.getMoviesList("popular", 1)
                 if (response.isSuccessful) {
                     val movies = response.body()?.results ?: emptyList()
-                    _popularMovies.value = movies
+                    _popularMovies.postValue(movies)
                     Log.d(TAG, "Popular Movies fetched successfully: $movies")
                 } else {
                     // Handle error
-                    _networkError.value = "Error fetching Popular Movies"
-
-                    _popularMovies.value = emptyList()
+                    _popularMovies.postValue(emptyList())
                     Log.e(TAG, "Error fetching Popular Movies: ${response.message()}")
                 }
             } catch (e: Exception) {
-                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Popular Movies fetch: ${e.message}")
             }
         }
     }
 
     fun fetchUpcomingMovies() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = movieApi.getMoviesList("upcoming", 1)
                 if (response.isSuccessful) {
                     val movies = response.body()?.results ?: emptyList()
-                    _upcomingMovies.value = movies
+                    _upcomingMovies.postValue(movies)
                     Log.d(TAG, "Upcoming Movies fetched successfully: $movies")
                 } else {
                     // Handle error
-                    _networkError.value = "Error fetching Upcoming Movies"
-                    _upcomingMovies.value = emptyList()
+                    _upcomingMovies.postValue(emptyList())
                     Log.e(TAG, "Error fetching Upcoming Movies: ${response.message()}")
                 }
             } catch (e: Exception) {
-                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Upcoming Movies fetch: ${e.message}")
             }
         }
@@ -219,7 +213,7 @@ class MovieViewModel : ViewModel() {
 
 
     fun refreshDataMain() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             fetchNowPlayingMovies()
             fetchPopularMovies()
             fetchUpcomingMovies()
@@ -229,7 +223,7 @@ class MovieViewModel : ViewModel() {
 
 
     fun refreshData(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO){
             fetchVideos(id)
             fetchSimilarMovies(id)
             fetchMovieCredits(id)

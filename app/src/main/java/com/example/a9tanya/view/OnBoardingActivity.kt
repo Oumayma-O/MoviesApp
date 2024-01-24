@@ -1,11 +1,18 @@
 package com.example.a9tanya.view
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.a9tanya.R
@@ -25,9 +32,27 @@ class OnBoardingActivity : AppCompatActivity() {
     private lateinit var Skip: Button
     private var position = 0
 
+
+    private val connectivityReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (isNetworkConnected()) {
+                //Toast.makeText(context, "Internet connection is back!", Toast.LENGTH_SHORT).show()
+                Log.e("MainActivity","Internet connection is back!")
+            }else{
+                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                Log.e("MainActivity","No internet connection")
+
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_on_boarding)
+
+
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(connectivityReceiver, filter)
 
 
         // when this activity is about to be launched, check if it's opened before or not
@@ -133,5 +158,35 @@ class OnBoardingActivity : AppCompatActivity() {
         // TODO: ADD an animation to the getstarted button
         // setup animation
         btnGetStarted.startAnimation(btnAnim)
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        try {
+            val connectivityManager =
+                getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            val networkCapabilities =
+                connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+
+            return when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } catch (e: Exception) {
+            // Log the exception for debugging purposes
+            e.printStackTrace()
+            return false
+        }
+    }
+
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(connectivityReceiver)
     }
 }

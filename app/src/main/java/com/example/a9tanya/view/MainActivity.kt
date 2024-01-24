@@ -1,15 +1,23 @@
 package com.example.a9tanya.view
 
 import android.app.ActivityOptions
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -36,9 +44,30 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
     private val slideHandler = Handler()
 
 
+    private val connectivityReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.e("MainActivity", "connectivityReceiver.onReceive called")
+
+            if (isNetworkConnected()) {
+                Log.e("MainActivity", "Internet connection is back!")
+               // Toast.makeText(context, "Internet connection is back!", Toast.LENGTH_SHORT).show()
+               refreshData()
+            }else if (!isNetworkConnected()) {
+                Log.e("MainActivity", "No internet connection")
+                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(connectivityReceiver, filter)
+
+
+
 
         viewPager = findViewById(R.id.slider)
         recyclerViewPopularMovies = findViewById(R.id.recyclerView1)
@@ -47,6 +76,25 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
         recyclerViewUpcomingMovies.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+
+
+
+        movieViewModel.networkError.observe(this) { errorMessage ->
+            errorMessage?.let {
+                if (!isNetworkConnected()) {
+                    Toast.makeText(this, "No internet connection !", Toast.LENGTH_SHORT).show()
+                    Log.e("MainActivity","No internet connection")
+
+                } else {
+                    // Show the original error message
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+                    Log.e("MainActivity","errorMessage")
+
+                }
+                // You can also use a dialog or other visual approach
+            }
+        }
+
 
         movieViewModel.nowPlayingMovies.observe(this, Observer { movies ->
             if (movies != null) {
@@ -81,6 +129,8 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
             }
         })
 
+
+
         movieViewModel.popularMovies.observe(this, Observer { movies ->
             if (movies != null) {
                 recyclerViewPopularMovies.adapter = FilmListAdapter(this@MainActivity, movies, this)
@@ -93,9 +143,16 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
             }
         })
 
-        movieViewModel.fetchNowPlayingMovies()
-        movieViewModel.fetchPopularMovies()
-        movieViewModel.fetchUpcomingMovies()
+
+        if (isNetworkConnected()) {
+
+            movieViewModel.fetchNowPlayingMovies()
+            movieViewModel.fetchPopularMovies()
+            movieViewModel.fetchUpcomingMovies()
+
+        }
+
+
 
         searchView1 = findViewById(R.id.searchView1)
 
@@ -143,8 +200,39 @@ class MainActivity : AppCompatActivity(), MovieItemClickListener {
         startActivity(intent, options.toBundle())
     }
 
+    private fun isNetworkConnected(): Boolean {
+        try {
+            val connectivityManager =
+                getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            val networkCapabilities =
+                connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+
+            return when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } catch (e: Exception) {
+            // Log the exception for debugging purposes
+            e.printStackTrace()
+            return false
+        }
+    }
+
+
+
+    private fun refreshData() {
+        movieViewModel.refreshDataMain()
+
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(connectivityReceiver)
         // Stop auto-slide when the activity is destroyed to avoid potential memory leaks
         sliderAdapter.stopAutoSlide()
     }

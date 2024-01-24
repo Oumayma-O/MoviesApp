@@ -1,8 +1,13 @@
 package com.example.a9tanya.view
 
 import android.app.ActivityOptions
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -42,10 +47,27 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
 
 
 
+    private val connectivityReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (isNetworkConnected()) {
+                //Toast.makeText(context, "Internet connection is back!", Toast.LENGTH_SHORT).show()
+                Log.e("MainActivity","Internet connection is back!")
+                refreshDataInBackground()
+            }else{
+                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                Log.e("MainActivity","No internet connection")
+
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
+
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(connectivityReceiver, filter)
 
         actionBar?.hide();
 
@@ -72,6 +94,19 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
         movieViewModel = ViewModelProvider(this)[MovieViewModel::class.java]
 
 
+
+        movieViewModel.networkError.observe(this) { errorMessage ->
+            errorMessage?.let {
+                if (!isNetworkConnected()) {
+                    // Show a user-friendly error message for no internet connection
+                    Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Show the original error message
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+                }
+                // You can also use a dialog or other visual approach
+            }
+        }
 
 
         val title = intent.getStringExtra("title")
@@ -221,6 +256,28 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
 
     }
 
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val networkCapabilities =
+                connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+
+            return when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            val networkInfo = connectivityManager.activeNetworkInfo
+            return networkInfo != null && networkInfo.isConnected
+        }
+    }
+
     override fun onMovieClick(movie: MovieDto, movieImageView: ImageView) {
         val intent = Intent(this@DetailsActivity, DetailsActivity::class.java)
         intent.putExtra("title", movie.title)
@@ -235,6 +292,18 @@ class DetailsActivity :  AppCompatActivity(), MovieItemClickListener {
 
     override fun onBackPressed() {
         super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(connectivityReceiver)
+        // Stop auto-slide when the activity is destroyed to avoid potential memory leaks
+   }
+
+    private fun refreshDataInBackground() {
+        val id = intent.getIntExtra("id", 0)
+
+        movieViewModel.refreshData(id)
     }
 
 }

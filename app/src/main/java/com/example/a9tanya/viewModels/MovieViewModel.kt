@@ -47,6 +47,10 @@ class MovieViewModel : ViewModel() {
     private val _searchResults = MutableLiveData<List<MovieDto>>()
     val searchResults: LiveData<List<MovieDto>> get() = _searchResults
 
+    private val _networkError = MutableLiveData<String>()
+    val networkError: LiveData<String> get() = _networkError
+
+
     fun fetchNowPlayingMovies() {
         viewModelScope.launch {
             try {
@@ -57,11 +61,13 @@ class MovieViewModel : ViewModel() {
                     Log.d(TAG, "Now Playing Movies fetched successfully: $movies")
                 } else {
                     // Handle error
+                    _networkError.value = "Error fetching Now Playing Movies"
                     _nowPlayingMovies.value = emptyList()
                     Log.e(TAG, "Error fetching Now Playing Movies: ${response.code()} - ${response.message()}")
                     Log.e(TAG, "Error response body: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
+                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Now Playing Movies fetch: ${e.message}")
             }
         }
@@ -77,10 +83,13 @@ class MovieViewModel : ViewModel() {
                     Log.d(TAG, "Popular Movies fetched successfully: $movies")
                 } else {
                     // Handle error
+                    _networkError.value = "Error fetching Popular Movies"
+
                     _popularMovies.value = emptyList()
                     Log.e(TAG, "Error fetching Popular Movies: ${response.message()}")
                 }
             } catch (e: Exception) {
+                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Popular Movies fetch: ${e.message}")
             }
         }
@@ -96,16 +105,17 @@ class MovieViewModel : ViewModel() {
                     Log.d(TAG, "Upcoming Movies fetched successfully: $movies")
                 } else {
                     // Handle error
+                    _networkError.value = "Error fetching Upcoming Movies"
                     _upcomingMovies.value = emptyList()
                     Log.e(TAG, "Error fetching Upcoming Movies: ${response.message()}")
                 }
             } catch (e: Exception) {
+                _networkError.value = "Erreur réseau: ${e.message}"
                 Log.e(TAG, "Exception during Upcoming Movies fetch: ${e.message}")
             }
         }
     }
 
-    private val _error = MutableLiveData<String>()
 
     fun fetchMovieDetail(movieId: Int) {
         val call = movieApi.getMovieDetail(movieId)
@@ -115,12 +125,13 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _movieDetail.value = response.body()
                 } else {
-                    _error.value = "Failed to fetch movie details"
+                    _networkError.value = "Failed to fetch movie details"
                 }
             }
 
             override fun onFailure(call: Call<MovieDetailResponse>, t: Throwable) {
-                _error.value = "Network error: ${t.message}"
+                _networkError.value = "Erreur réseau: ${t.message}"
+
             }
         })
     }
@@ -134,12 +145,13 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _credits.value = response.body()
                 } else {
-                    _error.value = "Failed to fetch movie credits"
+                    _networkError.value = "Failed to fetch movie credits"
                 }
             }
 
             override fun onFailure(call: Call<CastResponse>, t: Throwable) {
-                _error.value = "Network error: ${t.message}"
+                _networkError.value = "Erreur réseau: ${t.message}"
+
             }
         })
     }
@@ -154,12 +166,13 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _videos.value = response.body()?.results
                 } else {
-                    _error.value = "Failed to fetch videos"
+                    _networkError.value = "Failed to fetch videos"
+
                 }
             }
 
             override fun onFailure(call: Call<VideosResponse>, t: Throwable) {
-                _error.value = "Network error: ${t.message}"
+                _networkError.value = "Erreur réseau: ${t.message}"
             }
         })
     }
@@ -175,12 +188,12 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _similarMovies.value = response.body()?.results
                 } else {
-                    _error.value = "Failed to fetch similar movies"
+                    _networkError.value = "Failed to fetch similar movies"
                 }
             }
 
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                _error.value = "Network error: ${t.message}"
+                _networkError.value = "Network error: ${t.message}"
             }
         })
     }
@@ -194,15 +207,37 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _searchResults.value = response.body()?.results
                 } else {
-                    _error.value = "Failed to fetch search results"
+                    _networkError.value = "Failed to fetch search results"
                 }
             }
 
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                _error.value = "Network error: ${t.message}"
+                _networkError.value = "Network error: ${t.message}"
             }
         })
     }
+
+
+    fun refreshDataMain() {
+        viewModelScope.launch {
+            fetchNowPlayingMovies()
+            fetchPopularMovies()
+            fetchUpcomingMovies()
+        }
+
+    }
+
+
+    fun refreshData(id: Int) {
+        viewModelScope.launch {
+            fetchVideos(id)
+            fetchSimilarMovies(id)
+            fetchMovieCredits(id)
+            fetchMovieDetail(id)
+        }
+    }
+
+
 
 
 

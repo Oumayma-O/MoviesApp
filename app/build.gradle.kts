@@ -86,7 +86,6 @@ dependencies {
 
     implementation("io.reactivex.rxjava3:rxjava:3.0.13")
     implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
-    implementation("com.android.volley:volley-cronet:1.2.1")
     implementation("com.google.code.gson:gson:2.9.1")
 
 
